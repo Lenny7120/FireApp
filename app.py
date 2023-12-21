@@ -39,7 +39,7 @@ class FireApp:
         if location:
             return f"{location.latitude} {location.longitude}"
         else:
-            rwturn "Location not available"
+            return "Location not available"
 
     def sent_to_organization(self, username, emergency_type, user_location):
         organization_server_url = "https://example.com/organization-api"
@@ -55,7 +55,7 @@ class FireApp:
                 print("Data sent to organization sucessfully.")
             else:
                 print(f"Failed to send data. Server responded with status code {response.status_code}.")
-        except resquests.exceptions.RequestExceptions as e:
+        except requests.exceptions.RequestExceptions as e:
             print(f"An error occured while sending data: {e}")
             
     def register_user(self, username, password, emergency_type, user_location):
