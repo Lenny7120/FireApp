@@ -89,7 +89,6 @@ def register():
         emergency_type = request.form['emergency_type']
         user_location = request.form['user_location']
 
-
         fire_app.handle_registration(username, password, emergency_type, user_location)
         return redirect(url_for('home'))
 
