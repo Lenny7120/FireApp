@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for 
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 from geopy.geocoders import Nominatim
 import request
@@ -12,7 +12,7 @@ class FireApp:
         self.create_user_table()
 
     def create_connection(self):
-        return sqlite3.connect"user_database.db")
+        return sqlite3.connect("user_database.db")
 
     def create_user_table(self):
         conn = self.create_connection()
@@ -32,7 +32,7 @@ class FireApp:
         conn.close()
 
     def get_user_location(self):
-        geolocator = Nominatim(user_agent = "FireApp")
+        geolocator = Nominatim(user_agent="FireApp")
         user_ip = request.remote_addr
         location = geolocator.geocode(user_ip)
 
@@ -54,10 +54,10 @@ class FireApp:
             if response.satus_code == 200:
                 print("Data sent to organization sucessfully.")
             else:
-                print(f"Failed to send data. Server responded with status code {response.status_code}.")
+                print(f"Failed to send data. Server status code {response.status_code}.")
         except requests.exceptions.RequestExceptions as e:
             print(f"An error occured while sending data: {e}")
-            
+
     def register_user(self, username, password, emergency_type, user_location):
         conn = self.create_connection()
         cursor = conn.cursor()
@@ -68,16 +68,18 @@ class FireApp:
         conn.commit()
         conn.close()
 
-   def handle_registration(self, username, password, emergency_type, user_location):
-       self.register_user(username, password, emergency_type, user_location)
-       self.send_to_organization(username, password, emergency_type, user_location)
+    def handle_registration(self, username, password, emergency_type, user_location):
+        self.register_user(username, password, emergency_type, user_location)
+        self.send_to_organization(username, password, emergency_type, user_location)
 
 
 fire_app = FireApp()
 
+
 @app.route('/')
 def home():
     return render_template('index.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
