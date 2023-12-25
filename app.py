@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 from geopy.geocoders import Nominatim
-import request
+import requests
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 
 class FireApp:
@@ -20,7 +20,7 @@ class FireApp:
 
         cursor.execute('''
              CREATE TABLE IF NOT EXISTS users(
-             id PRIMARY KEY AUTOINCREMENT,
+             id INTEGER  PRIMARY KEY AUTOINCREMENT,
              username TEXT NOT NULL,
              password TEXT NOT NULL,
              emergency_type TEXT NOT NULL,

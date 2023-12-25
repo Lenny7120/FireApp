@@ -1,0 +1,36 @@
+body {                                                            background-color: yellow;                                     margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+                                                              }
+form {
+    background-color: white;                                  
+    width: 350px;
+    height:420px;
+    border-radius: 8px;
+    box-sizing: border-box;                 
+}
+h1 {
+  font-size:40px;
+  text-align: center;
+  text-transform: uppercase;
+  margin:40px 0;
+}
+label {       
+     display: block;                                               margin-bottom: 8px;                                      }
+
+input {
+     width: 80%;
+     padding: 8px;                                                 margin-bottom: 16px;                                     }
+                                                              button {
+      padding: 10px;
+}
+@media (max-width: 600px) {
+  form {
+    width: 80%;
+  }
+}
