@@ -68,9 +68,15 @@ class FireApp:
         conn.commit()
         conn.close()
 
-    def handle_registration(self, username, password, emergency_type, user_location):
-        self.register_user(username, password, emergency_type, user_location)
-        self.send_to_organization(username, password, emergency_type, user_location)
+    def verify_login(self, username, password):
+        conn = self.create_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM users WHERE username=? AND password=?
+        ''', (username, password))
+        user = cursor.fetchone()
+        conn.close()
+        return user
 
 
 fire_app = FireApp()
@@ -79,6 +85,21 @@ fire_app = FireApp()
 @app.route('/')
 def home():
     return render_template('index.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+
+        user = fire_app.verify_login(username, password)
+        if user:
+            return redirect(url_for('report'))
+        else:
+            return render_template('login.html', error='Invalid username or password')
+    return render_template('login.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -90,9 +111,18 @@ def register():
         user_location = request.form['user_location']
 
         fire_app.handle_registration(username, password, emergency_type, user_location)
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
 
     return render_template('register.html', user_location=fire_app.get_user_location())
+
+
+@app.route('/report', methods=['GET', 'POST'])
+def report():
+    if request.method == 'POST':
+        return redirect(url_for('home'))
+
+
+    return render_template('report.html', user_location=fire_app.get_user_location())
 
 
 if __name__ == '__main__':
