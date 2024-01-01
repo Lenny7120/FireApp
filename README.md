@@ -1,8 +1,8 @@
-# Emergency App README
+# Fire App README
 
 ## Overview
 
-The Emergency App is a mobile application designed to provide users with a quick and efficient way to report emergencies such as fires, accidents, or situations requiring rescue. The app allows users to register an account, select the type of emergency, and confirm their location. The collected information is then securely transmitted to an organization's server for prompt response.
+The Fire App is a mobile application designed to provide users with a quick and efficient way to report emergencies such as fires, accidents, or situations requiring rescue. The app allows users to register an account, select the type of emergency, and confirm their location. The collected information is then securely transmitted to an organization's server for prompt response.
 
 ## Features
 ### 1. User Registration
@@ -33,7 +33,7 @@ The app is designed with a user-friendly interface that adapts to various screen
 
 **Download and Install the App:**
 
-Download the Emergency App from the designated app store for your mobile device.
+Download the Fire App from the designated app store for your mobile device.
 Follow the installation instructions provided by the app store.
 
 **User Registration:**
@@ -58,7 +58,7 @@ Emergency details are sent to the organization's server for prompt response.
 
 ## Security and Privacy 
 
-The Emergency App prioritizes user security and privacy through the following measures:
+The Fire App prioritizes user security and privacy through the following measures:
 
 User passwords are securely stored using industry-standard encryption.
 Sensitive information is transmitted to the organization's server using secure protocols.
@@ -69,7 +69,7 @@ The app requires a stable internet connection for user registration and data sub
 
 ## Development and Contributions
 
-If you are interested in contributing to the development of the Emergency App, feel free to fork the repository, make improvements, and submit a pull request.
+If you are interested in contributing to the development of the Fire App, feel free to fork the repository, make improvements, and submit a pull request.
 
 ## Known Issues
 No known issues at the moment.
@@ -78,6 +78,6 @@ No known issues at the moment.
 
 For support or inquiries, please contact the development team at ocrank20@gmail.com
 
-Thank you for using the Emergency App to contribute to the safety and well-being of your community!
+Thank you for using the Fire App to contribute to the safety and well-being of your community!
 
 
