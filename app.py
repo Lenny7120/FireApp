@@ -23,23 +23,46 @@ class FireApp:
              id INTEGER  PRIMARY KEY AUTOINCREMENT,
              username TEXT NOT NULL,
              password TEXT NOT NULL,
-             emergency_type TEXT NOT NULL,
-             location TEXT NOT NULL
+             email  TEXT NOT NULL,
+             phone_number  TEXT NOT NULL
              )
              ''')
 
         conn.commit()
         conn.close()
 
-    def get_user_location(self):
-        geolocator = Nominatim(user_agent="FireApp")
-        user_ip = request.remote_addr
-        location = geolocator.geocode(user_ip)
 
-        if location:
-            return f"{location.latitude} {location.longitude}"
-        else:
-            return "Location not available"
+    def recreate_user_table(self):
+        conn = self.create_connection()
+        cursor = conn.cursor()
+        cursor.execute("DROP TABLE IF EXISTS users")
+        self.create_user_table()
+        conn.commit()
+        conn.close()
+
+    def inspect_table_structure(self):
+        conn = self.create_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("PRAGMA table_info(users)")
+        columns = cursor.fetchall()
+
+        for column in columns:
+            print(columns)
+
+        conn.close()
+
+    def get_user_location(self):
+        if request.endpoint == 'report':
+            geolocator = Nominatim(user_agent="FireApp")
+            user_ip = request.remote_addr
+            location = geolocator.geocode(user_ip)
+
+            if location:
+                return f"{location.latitude} {location.longitude}"
+            else:
+                return "Location not available"
+        return None
 
     def sent_to_organization(self, username, emergency_type, user_location):
         organization_server_url = "https://example.com/organization-api"
@@ -58,13 +81,14 @@ class FireApp:
         except requests.exceptions.RequestExceptions as e:
             print(f"An error occured while sending data: {e}")
 
-    def register_user(self, username, password, emergency_type, user_location):
+    def register_user(self, username, password, email, phone_number):
+        print(f"Registering user: {username}, {password}, {email}, {phone_number}")
         conn = self.create_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO users(username, password, emergency_type, location)
+            INSERT INTO users(username, password, email, phone_number)
             VALUES(?, ?, ?, ?)
-            ''', (username, password, emergency_type, user_location))
+            ''', (username, password, email, phone_number))
         conn.commit()
         conn.close()
 
@@ -78,8 +102,14 @@ class FireApp:
         conn.close()
         return user
 
+    def handle_registration(self, username, password, email, phone_number):
+        self.register_user(username, password, email, phone_number)
+        print("User registered successfully.")
+
 
 fire_app = FireApp()
+fire_app.recreate_user_table()
+fire_app.inspect_table_structure()
 
 
 @app.route('/')
@@ -93,7 +123,6 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-
         user = fire_app.verify_login(username, password)
         if user:
             return redirect(url_for('report'))
@@ -105,22 +134,27 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        emergency_type = request.form['emergency_type']
-        user_location = request.form['user_location']
+        print("RECIVED POST request")
+        print("Form Data:", request.get_data(as_text=True))
+        username = request.form.get('username')
+        password = request.form.get('password')
+        email = request.form.get('email')
+        phone_number = request.form.get('phone_number')
 
-        fire_app.handle_registration(username, password, emergency_type, user_location)
+        if username is not None:
+            fire_app.handle_registration(username, password, email, phone_number)
         return redirect(url_for('login'))
+        
+    else:
+        print("Username not found in form data")
 
-    return render_template('register.html', user_location=fire_app.get_user_location())
+    return render_template('register.html')
 
 
 @app.route('/report', methods=['GET', 'POST'])
 def report():
     if request.method == 'POST':
         return redirect(url_for('home'))
-
 
     return render_template('report.html', user_location=fire_app.get_user_location())
 

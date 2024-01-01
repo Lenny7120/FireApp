@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Emergency</title>
+</head>
+<body>
+    <header>
+	<h1>Welcome, {{ username }} </h1>
+    </header>
+    
+    <form method="post" action="">
+	<p>Confirm your location: {{ user_location }}</p>
+					        
+	<label for="emergency_type">Select Emergency Type:</label>
+	<select id="emergency_type" name="emergency_type" required>
+	    <option value="fire">Fire</option>
+	    <option value="accident"><Accident</option>
+	    <option value="rescue">Rescue</option>
+	</select>
+	
+
+	<input type="submit" value="Submit Report">
+   </form>
+</body>
+</html>
+
+
