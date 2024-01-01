@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, g
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import sqlite3
 from geopy.geocoders import Nominatim
@@ -13,32 +13,24 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 
+DATABASE = 'user_database.db'
+
+
 class User(UserMixin):
     def __init__(self, user_id, username):
         self.id = user_id
         self.username = username
 
 
-conn = sqlite3.connect('user_database.db')
-cursor = conn.cursor()
-
-
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users(
-    id INTEGER  PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL,
-    email  TEXT NOT NULL,
-    phone_number  TEXT NOT NULL
-    )
-    ''')
-conn.commit()
-
-
-
 class FireApp:
     def create_connection(self):
-        return sqlite3.connect("user_database.db")
+        return sqlite3.connect(DATABASE)
+        
+
+    def close_connection(self, connection):
+        if connection:
+            connection.close()
+        
 
     def create_user_table(self):
         conn = self.create_connection()
@@ -59,12 +51,17 @@ class FireApp:
 
 
     def recreate_user_table(self):
-        conn = self.create_connection()
-        cursor = conn.cursor()
-        cursor.execute("DROP TABLE IF EXISTS users")
-        self.create_user_table()
-        conn.commit()
-        conn.close()
+        conn = None
+        try :
+            conn = self.create_connection()
+            cursor = conn.cursor()
+            cursor.execute("DROP TABLE IF EXISTS users")
+            self.create_user_table()
+            conn.commit()
+        except sqlite3.Error as e:
+            print(f"SQlite error: {e}")
+        finally:
+            self.close_connection(conn)
 
     def inspect_table_structure(self):
         conn = self.create_connection()
@@ -140,12 +137,12 @@ fire_app.inspect_table_structure()
 
 @login_manager.user_loader
 def load_user(user_id):
-    with fire_app.create_connection() as conn:                        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE id = ?', (us
-er_id))
-        user_data = cursor.fetchone()                                 if user_data:
-            return User(user_data[0], user_data[1], user_data[
-2])
+    with fire_app.create_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE id = ?', (user_id))
+        user_data = cursor.fetchone()
+        if user_data:
+            return User(user_data[0], user_data[1])
     return None
 
 
@@ -159,12 +156,15 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        cursor.execute('SELECT * FROM users WHERE username = ?',(username,))
-        user_data = cursor.fetchone()
-        if user_data:
-            user = User(user_data[0], user_data[1], user_data[2])
-            login_user(user)
-            return redirect(url_for('report'))
+
+        with fire_app.create_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM users WHERE username = ?',(username,))
+            user_data = cursor.fetchone()
+            if user_data:
+                user = User(user_data[0], user_data[1])
+                login_user(user)
+                return redirect(url_for('report'))
     return render_template('login.html')
 
 @app.route('/logout')
