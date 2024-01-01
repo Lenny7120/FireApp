@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_login, import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import sqlite3
 from geopy.geocoders import Nominatim
 import requests
@@ -35,19 +35,8 @@ cursor.execute('''
 conn.commit()
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    cursor.execute('SELECT * FROM users WHERE id = ?', (user_id))
-    user_data = cursor.fetchone()
-    if user_data:
-        return User(user_data[0], user_data[1], user_data[2])
-    return None
-
 
 class FireApp:
-    def __init__(self):
-        self.create_user_table()
-
     def create_connection(self):
         return sqlite3.connect("user_database.db")
 
@@ -149,6 +138,17 @@ fire_app.recreate_user_table()
 fire_app.inspect_table_structure()
 
 
+@login_manager.user_loader
+def load_user(user_id):
+    with fire_app.create_connection() as conn:                        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE id = ?', (us
+er_id))
+        user_data = cursor.fetchone()                                 if user_data:
+            return User(user_data[0], user_data[1], user_data[
+2])
+    return None
+
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -160,7 +160,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         cursor.execute('SELECT * FROM users WHERE username = ?',(username,))
-        user_data cursor.fetchone()
+        user_data = cursor.fetchone()
         if user_data:
             user = User(user_data[0], user_data[1], user_data[2])
             login_user(user)
