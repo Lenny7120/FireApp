@@ -1,10 +1,47 @@
 from flask import Flask, render_template, request, redirect, url_for
+from flask_login, import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import sqlite3
 from geopy.geocoders import Nominatim
 import requests
 
 
 app = Flask(__name__, static_url_path='/static')
+app.secret_key = 'Treysongz78'
+
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+
+class User(UserMixin):
+    def __init__(self, user_id, username):
+        self.id = user_id
+        self.username = username
+
+
+conn = sqlite3.connect('user_database.db')
+cursor = conn.cursor()
+
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users(
+    id INTEGER  PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    email  TEXT NOT NULL,
+    phone_number  TEXT NOT NULL
+    )
+    ''')
+conn.commit()
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    cursor.execute('SELECT * FROM users WHERE id = ?', (user_id))
+    user_data = cursor.fetchone()
+    if user_data:
+        return User(user_data[0], user_data[1], user_data[2])
+    return None
 
 
 class FireApp:
@@ -122,13 +159,19 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
-        user = fire_app.verify_login(username, password)
-        if user:
+        cursor.execute('SELECT * FROM users WHERE username = ?',(username,))
+        user_data cursor.fetchone()
+        if user_data:
+            user = User(user_data[0], user_data[1], user_data[2])
+            login_user(user)
             return redirect(url_for('report'))
-        else:
-            return render_template('login.html', error='Invalid username or password')
     return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -152,11 +195,12 @@ def register():
 
 
 @app.route('/report', methods=['GET', 'POST'])
+@login_required
 def report():
     if request.method == 'POST':
         return redirect(url_for('home'))
 
-    return render_template('report.html', user_location=fire_app.get_user_location())
+    return render_template('report.html', username=current_user.username, user_location=fire_app.get_user_location())
 
 
 if __name__ == '__main__':
