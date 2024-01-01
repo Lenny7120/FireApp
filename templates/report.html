@@ -4,14 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Emergency</title>
+    <style>
+        #confirmModal {
+	    display: none;
+	    position: fixed;
+	    top: 50%;
+	    left: 50%;
+	    transform: translate(-50%, -50%);
+	    background-color: white;
+	    padding: 20px;
+	    border: 1px solid #ccc;
+	    z-index: 1000;
+	}
+    </style>
 </head>
 <body>
     <header>
 	<h1>Welcome, {{ username }} </h1>
     </header>
     
-    <form method="post" action="">
-	<p>Confirm your location: {{ user_location }}</p>
+    <form id="reportForm" method="post" action="">
+	    <p>Confirm your location: <span id="locationSpan"> {{ user_location }}</span></p>
 					        
 	<label for="emergency_type">Select Emergency Type:</label>
 	<select id="emergency_type" name="emergency_type" required>
@@ -22,7 +35,47 @@
 	
 
 	<input type="submit" value="Submit Report">
+
+	<input type="hidden" id="user_location" name="user_location" value="{{ user_location }}">
+
+	<input type="button" value="Submit Report" onclick="showConfirmModal()">
    </form>
+
+   <div id="confirmModal">
+	   <p>Confirm your Location: <span id="modalLocationSpan"></span></p>
+       <button onclick="submitFinalReport()">Submit</button>
+   </div>
+
+   <script>
+       function showConfirmModal() {
+	   var modalLocationSpan = document.getElementById('modalLocationSpan');
+	   var location = document.getElementById('user_location').value;
+	
+	   modalLocationSpan.innerText = location;
+
+	   var modal = document.getElementById('confirmModal');
+	   modal.style display = 'block';
+       }
+
+       function submitFinalReport() {
+	   var location = document.getElementById('user_location').value;
+	   
+	   var formData = new FormData(document.getElementById('reportForm'));
+	   formData.append('confirmed_location', location);
+
+	   fetch('/submit_report', {
+	       method: 'POST'
+	       body: 'formData'
+	   })
+	   .then(response => response.json())
+	   .then(data => {
+	       alert('Final Report Submitted Successfully!');
+	       document.getElementById('successMessage').innerText = 'Report Submitted Successfully!';
+	       var modal = document getElementById('confirmModal');
+	       modal.style.display = 'none';
+	   })
+	   .catch(error => console.error('Error:' error));
+       }
 </body>
 </html>
 
