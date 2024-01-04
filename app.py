@@ -3,6 +3,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 import sqlite3
 from geopy.geocoders import Nominatim
 import requests
+import datetime
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -23,6 +24,10 @@ class User(UserMixin):
 
 
 class FireApp:
+    def __init__(self):
+        self.create_user_table()
+
+
     def create_connection(self):
         return sqlite3.connect(DATABASE)
         
@@ -130,6 +135,31 @@ class FireApp:
         print("User registered successfully.")
 
 
+    def get_daily_safety_tips():
+        print("Inside get_daily_safety_tips function")
+        tips = [
+            "Don't overload electrical sockets.",
+            "Turn off your vehicle's engine when refuelling.",
+            "Keep petrol and other fuels out of sight and reach of children. Petrol is highly toxic in addition to being a fire hazard.",
+            "Don't smoke, light matches or use lighters while refueling.",
+            "Don't use any electronic device,such as cell phones while refueling.",
+            "To avoid spills, do not overfill your vehicle.",
+            "If a fire starts while you are refueling, do not remove the nozzle from the vehicle or try to stop the flow of fuel. Leave the area immediately and call for help.",
+            "if you must get into the vehicle during refueling, discharge any static electricity by touching metal on the outside of the nozzle is removed from your vehicle tank inlet.",
+            "Use only approved portable containers for transporting or storing petrol.",
+            "Keep matches away from children.",
+            "Turn off all electrical socket when not in use",
+            "Change rubber seal regularly when filling your gas.",
+            "Use qualified electrician when wiring your house.",
+            "when percieve the smell of gas in your kitchen, open the windows and doors to allow fresh air in, Don't turn on the lights or use your phone."
+        ]
+
+        today = datetime.date.today().day
+        result = tips[today % len(tips)]
+        print("Daily safety tips:", result)
+
+
+
 fire_app = FireApp()
 fire_app.recreate_user_table()
 fire_app.inspect_table_structure()
@@ -197,10 +227,14 @@ def register():
 @app.route('/report', methods=['GET', 'POST'])
 @login_required
 def report():
+    print("inside /report route")
     if request.method == 'POST':
-        return redirect(url_for('home'))
+        user_location = fire_app.get_user_location()
+        daily_safety_tip = get_daily_safety_tips()
+        print("Daily Safety Tip:", daily_safety_tip)
+        return render_template('report.html', username=current_user.username, user_location=user_location, daily_safety_tip=daily_safety_tip, show_popup=True)
 
-    return render_template('report.html', username=current_user.username, user_location=fire_app.get_user_location())
+    return render_template('report.html', username=current_user.username, user_location=fire_app.get_user_location(), show_popup=True)
 
 
 if __name__ == '__main__':
