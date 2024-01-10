@@ -153,10 +153,9 @@ class FireApp:
             "Use qualified electrician when wiring your house.",
             "when percieve the smell of gas in your kitchen, open the windows and doors to allow fresh air in, Don't turn on the lights or use your phone."
         ]
-
         today = datetime.date.today().day
-        result = tips[today % len(tips)]
-        print("Daily safety tips:", result)
+        return tips[today % len(tips)]  
+        
 
 
 
@@ -227,6 +226,7 @@ def register():
 @app.route('/report', methods=['GET', 'POST'])
 @login_required
 def report():
+    daily_safety_tip = None
     print("inside /report route")
     if request.method == 'POST':
         user_location = fire_app.get_user_location()
@@ -234,7 +234,7 @@ def report():
         print("Daily Safety Tip:", daily_safety_tip)
         return render_template('report.html', username=current_user.username, user_location=user_location, daily_safety_tip=daily_safety_tip, show_popup=True)
 
-    return render_template('report.html', username=current_user.username, user_location=fire_app.get_user_location(), show_popup=True)
+    return render_template('report.html', username=current_user.username, user_location=fire_app.get_user_location(), show_popup=True, daily_safety_tip=get_daily_safety_tips())
 
 
 if __name__ == '__main__':

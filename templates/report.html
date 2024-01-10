@@ -28,8 +28,10 @@
 	
     <section id="dailySafetyTip">
 	<h2>Daily Saftey Tip</h2>
-	<p>{{ daily_safety_tip }}</p>
-	<p>Debug: {{ daily_safety_tip|default('Not Available') }}</p>
+	{% for tip in daily_safety_tip %}
+	    <p>{{ tip}}</p>
+	{% endfor %}
+
     </section>
 					        
 	<label for="emergency_type">Select Emergency Type:</label>
